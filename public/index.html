@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Lobbies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        .header-link {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        #lobby-form, #join-form {
+            margin: 20px;
+        }
+        #lobby-list {
+            margin: 20px;
+        }
+        #lobbies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .lobby-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+        .lobby-card:hover {
+            background-color: #f9f9f9;
+        }
+        .lobby-card h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .lobby-card p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>RPG de Mesa</h1>
+        <a class="header-link" href="register.html">Cadastro</a>
+        <a class="header-link" href="login.html">Login</a>
+    </div>
+    <div id="lobby-form">
+        <input id="lobby-name" placeholder="Nome do Lobby" />
+        <input id="user-name" placeholder="Seu Nome" />
+        <label>
+            <input type="checkbox" id="password-required" /> Exigir Senha
+        </label>
+        <div id="password-field" style="display: none;">
+            <input id="lobby-password" placeholder="Senha do Lobby" />
+        </div>
+        <button id="create-lobby">Criar Lobby</button>
+    </div>
+    <div id="join-form">
+        <input id="join-lobby-name" placeholder="Nome do Lobby para Entrar" />
+        <input id="join-user-name" placeholder="Seu Nome" />
+        <input id="join-password" type="password" placeholder="Senha (se necessário)" />
+        <button id="join-lobby">Entrar no Lobby</button>
+    </div>
+    <div id="lobby-list">
+        <h2>Lobbies Disponíveis</h2>
+        <div id="lobbies"></div>
+    </div>
+    <script>
+        // Atualiza a visibilidade do campo de senha
+        document.getElementById('password-required').onchange = function() {
+            const passwordField = document.getElementById('password-field');
+            if (this.checked) {
+                passwordField.style.display = 'block';
+            } else {
+                passwordField.style.display = 'none';
+                document.getElementById('lobby-password').value = ''; // Limpa o campo de senha
+            }
+        };
+
+        document.getElementById('create-lobby').onclick = function() {
+            const lobbyName = document.getElementById('lobby-name').value;
+            const userName = document.getElementById('user-name').value;
+            const passwordRequired = document.getElementById('password-required').checked;
+            const lobbyPassword = document.getElementById('lobby-password').value;
+
+            if (lobbyName && userName) {
+                const lobbyData = {
+                    name: lobbyName,
+                    creator: userName,
+                    passwordRequired: passwordRequired,
+                    password: passwordRequired ? lobbyPassword : null
+                };
+
+                fetch('/lobbies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(lobbyData)
+                })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    window.location.href = `/lobby.html?lobby=${lobbyName}&user=${userName}`;
+                })
+                .catch(error => console.error('Erro ao criar o lobby:', error));
+            }
+        };
+
+        document.getElementById('join-lobby').onclick = function() {
+            const lobbyName = document.getElementById('join-lobby-name').value;
+            const userName = document.getElementById('join-user-name').value;
+            const password = document.getElementById('join-password').value;
+
+            if (lobbyName && userName) {
+                fetch('/join-lobby', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: lobbyName, user: userName, password })
+                })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    window.location.href = `/lobby.html?lobby=${lobbyName}&user=${userName}`;
+                })
+                .catch(error => console.error('Erro ao entrar no lobby:', error));
+            }
+        };
+
+        // Função para atualizar a lista de lobbies
+        function updateLobbyList() {
+            fetch('/lobbies')
+                .then(response => response.json())
+                .then(lobbies => {
+                    const lobbiesContainer = document.getElementById('lobbies');
+                    lobbiesContainer.innerHTML = '';
+                    lobbies.forEach(lobby => {
+                        const card = document.createElement('div');
+                        card.className = 'lobby-card';
+                        card.onclick = function() {
+                            window.location.href = `/lobby.html?lobby=${lobby.name}&user=${userName}`;
+                        };
+                        card.innerHTML = `
+                            <h3>${lobby.name}</h3>
+                            <p>Criador: ${lobby.creator}</p>
+                            <p>Usuários: ${lobby.userCount}/${lobby.maxUsers}</p>
+                        `;
+                        lobbiesContainer.appendChild(card);
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar lobbies:', error));
+        }
+
+        updateLobbyList(); // Atualiza a lista de lobbies ao carregar a página
+    </script>
+</body>
+</html>

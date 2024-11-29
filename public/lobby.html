@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby</title>
+    <style>
+            /* Estilos existentes */
+            #container {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+            #header {
+                background-color: #f4f4f4;
+                padding: 10px;
+                text-align: center;
+            }
+            #main-content {
+                flex: 1;
+                display: flex;
+                padding: 10px;
+            }
+            #chat {
+                flex: 1;
+                border: 1px solid #ddd;
+                padding: 10px;
+                overflow-y: auto;
+                background: #fafafa;
+            }
+            #participants {
+                width: 200px;
+                margin-left: 10px;
+                border: 1px solid #ddd;
+                padding: 10px;
+                background: #fafafa;
+            }
+            #controls {
+                background-color: #f4f4f4;
+                padding: 10px;
+            }
+            #controls input, #controls button {
+                margin-right: 10px;
+            }
+            
+            /* Novo estilo para aumentar o tamanho do campo de mensagem */
+            #message {
+                width: 400px; /* Ajuste a largura conforme necessário */
+                height: 40px; /* Ajuste a altura conforme necessário */
+            }
+        
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Lobby: <span id="lobby-name"></span></h1>
+        </div>
+        <div id="main-content">
+            <div id="chat"></div>
+            <div id="participants">
+                <h3>Participantes</h3>
+                <ul id="participants-list"></ul>
+            </div>
+        </div>
+        <div id="controls">
+            <input id="message" autocomplete="off" placeholder="Digite sua mensagem" />
+            <button id="send-message">Enviar</button>
+            <input type="file" id="image-upload" accept="image/*" />
+            <button id="send-image">Enviar Imagem</button>
+            <div id="roll-form">
+                <input id="dice-type" placeholder="d20, d6, etc." />
+                <button id="roll-dice">Rolar Dados</button>
+            </div>
+            <button id="leave">Sair do Lobby</button>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const lobbyName = urlParams.get('lobby');
+        const userName = urlParams.get('user');
+        const socket = io();
+
+        document.getElementById('lobby-name').textContent = lobbyName;
+
+        socket.emit('join', lobbyName, userName);
+
+        socket.on('update participants', (participants) => {
+            const participantsList = document.getElementById('participants-list');
+            participantsList.innerHTML = '';
+            participants.forEach(participant => {
+                const li = document.createElement('li');
+                li.textContent = participant;
+                participantsList.appendChild(li);
+            });
+        });
+
+        document.getElementById('send-message').onclick = () => {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            if (message.trim()) {
+                socket.emit('chat message', { lobby: lobbyName, user: userName, message });
+                messageInput.value = '';
+            }
+        };
+
+        socket.on('chat message', (data) => {
+            const chat = document.getElementById('chat');
+            const div = document.createElement('div');
+            div.textContent = `${data.user}: ${data.message}`;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        });
+
+        document.getElementById('send-image').onclick = () => {
+            const imageInput = document.getElementById('image-upload');
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    socket.emit('chat image', { lobby: lobbyName, user: userName, image: reader.result });
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        socket.on('chat image', (data) => {
+            const chat = document.getElementById('chat');
+            const div = document.createElement('div');
+            const img = document.createElement('img');
+            img.src = data.image;
+            img.style.maxWidth = '100%';
+            div.textContent = `${data.user}: `;
+            div.appendChild(img);
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        });
+
+        document.getElementById('roll-dice').onclick = () => {
+            const diceType = document.getElementById('dice-type').value;
+            if (diceType.trim()) {
+                socket.emit('roll dice', { lobby: lobbyName, diceType });
+            }
+        };
+
+        socket.on('roll result', (result) => {
+            const chat = document.getElementById('chat');
+            const div = document.createElement('div');
+            div.textContent = `Resultado do dado ${result.diceType}: ${result.result}`;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        });
+
+        document.getElementById('leave').onclick = () => {
+            socket.emit('leave', lobbyName, userName);
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
