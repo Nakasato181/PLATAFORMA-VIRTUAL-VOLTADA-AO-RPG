@@ -5,76 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lobby</title>
     <style>
-            /* Estilos existentes */
-            #container {
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-            }
-            #header {
-                background-color: #f4f4f4;
-                padding: 10px;
-                text-align: center;
-            }
-            #main-content {
-                flex: 1;
-                display: flex;
-                padding: 10px;
-            }
-            #chat {
-                flex: 1;
-                border: 1px solid #ddd;
-                padding: 10px;
-                overflow-y: auto;
-                background: #fafafa;
-            }
-            #participants {
-                width: 200px;
-                margin-left: 10px;
-                border: 1px solid #ddd;
-                padding: 10px;
-                background: #fafafa;
-            }
-            #controls {
-                background-color: #f4f4f4;
-                padding: 10px;
-            }
-            #controls input, #controls button {
-                margin-right: 10px;
-            }
-            
-            /* Novo estilo para aumentar o tamanho do campo de mensagem */
-            #message {
-                width: 400px; /* Ajuste a largura conforme necessário */
-                height: 40px; /* Ajuste a altura conforme necessário */
-            }
+        /* Layout principal */
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #header {
+            background-color: #444;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        #main-content {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+        }
+        #chat {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-y: auto; /* Adicionado */
+            background: #fafafa;
+            max-height: calc(100vh - 200px); /* Ajusta conforme o layout */
+        }
         
+        #participants {
+            width: 220px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        #controls {
+            background-color: #f4f4f4;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #controls input, #controls button {
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        #controls input#message {
+            flex: 1;
+        }
+        #controls button {
+            cursor: pointer;
+        }
+        #participants ul {
+            list-style: none;
+            padding: 0;
+        }
+        #participants li {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #participants button {
+            padding: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+            background-color: red;
+            border: none;
+            border-radius: 5px;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div id="container">
+        <!-- Cabeçalho -->
         <div id="header">
             <h1>Lobby: <span id="lobby-name"></span></h1>
         </div>
+
+        <!-- Conteúdo principal -->
         <div id="main-content">
+            <!-- Área do chat -->
             <div id="chat"></div>
+
+            <!-- Lista de participantes -->
             <div id="participants">
                 <h3>Participantes</h3>
                 <ul id="participants-list"></ul>
             </div>
         </div>
+
+        <!-- Controles -->
         <div id="controls">
             <input id="message" autocomplete="off" placeholder="Digite sua mensagem" />
             <button id="send-message">Enviar</button>
             <input type="file" id="image-upload" accept="image/*" />
             <button id="send-image">Enviar Imagem</button>
-            <div id="roll-form">
-                <input id="dice-type" placeholder="d20, d6, etc." />
-                <button id="roll-dice">Rolar Dados</button>
-            </div>
+            <input id="dice-type" placeholder="d20, d6, etc." />
+            <button id="roll-dice">Rolar Dados</button>
             <button id="leave">Sair do Lobby</button>
         </div>
     </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -84,18 +125,32 @@
 
         document.getElementById('lobby-name').textContent = lobbyName;
 
+        // Conecta ao lobby
         socket.emit('join', lobbyName, userName);
 
-        socket.on('update participants', (participants) => {
+        // Atualiza a lista de participantes
+        socket.on('update participants', (participants, creator) => {
             const participantsList = document.getElementById('participants-list');
             participantsList.innerHTML = '';
+
             participants.forEach(participant => {
                 const li = document.createElement('li');
                 li.textContent = participant;
+
+                // Adiciona botão de remover se for o criador e o usuário não for ele mesmo
+                if (userName === creator && participant !== creator) {
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Remover';
+                    removeButton.onclick = () => {
+                        socket.emit('remove user', { lobby: lobbyName, user: participant });
+                    };
+                    li.appendChild(removeButton);
+                }
                 participantsList.appendChild(li);
             });
         });
 
+        // Envia mensagem
         document.getElementById('send-message').onclick = () => {
             const messageInput = document.getElementById('message');
             const message = messageInput.value;
@@ -105,6 +160,7 @@
             }
         };
 
+        // Recebe mensagens
         socket.on('chat message', (data) => {
             const chat = document.getElementById('chat');
             const div = document.createElement('div');
@@ -113,6 +169,7 @@
             chat.scrollTop = chat.scrollHeight;
         });
 
+        // Envia imagem
         document.getElementById('send-image').onclick = () => {
             const imageInput = document.getElementById('image-upload');
             if (imageInput.files.length > 0) {
@@ -125,18 +182,19 @@
             }
         };
 
+        // Recebe imagens
         socket.on('chat image', (data) => {
             const chat = document.getElementById('chat');
             const div = document.createElement('div');
             const img = document.createElement('img');
             img.src = data.image;
-            img.style.maxWidth = '100%';
             div.textContent = `${data.user}: `;
             div.appendChild(img);
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
         });
 
+        // Rola dados
         document.getElementById('roll-dice').onclick = () => {
             const diceType = document.getElementById('dice-type').value;
             if (diceType.trim()) {
@@ -152,6 +210,7 @@
             chat.scrollTop = chat.scrollHeight;
         });
 
+        // Sai do lobby
         document.getElementById('leave').onclick = () => {
             socket.emit('leave', lobbyName, userName);
             window.location.href = 'index.html';
