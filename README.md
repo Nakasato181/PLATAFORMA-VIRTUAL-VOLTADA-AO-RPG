@@ -48,7 +48,10 @@ cd /caminho/para/a/pasta/do/projeto
 Verifique se o arquivo package.json está presente nessa pasta.
 
 **Execute o comando para instalar as dependências:**
+
 npm install
+
+npm install express socket.io
 
 Isso instalará todas as dependências necessárias listadas no arquivo package.json.
 
