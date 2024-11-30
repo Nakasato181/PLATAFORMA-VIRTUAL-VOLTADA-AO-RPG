@@ -35,18 +35,19 @@ Antes de rodar o projeto, você precisará garantir que as seguintes ferramentas
      - Acesse a página do repositório no GitHub: [PLATAFORMA VIRTUAL VOLTADA AO RPG](https://github.com/Nakasato181/PLATAFORMA-VIRTUAL-VOLTADA-AO-RPG)
      - Clique no botão "Code" e selecione "Download ZIP".
      - Extraia o arquivo ZIP em uma pasta de sua escolha
+
    
-##Instale as Dependências
+**##Instale as Dependências**
 
-Navegue até a pasta do projeto no terminal (onde o package.json está localizado) e execute o comando:
-
-npm install
+**Navegue até a pasta do projeto no terminal do node.js (onde o package.json está localizado) e execute o comando:
+**
+-npm install
 
 Este comando irá baixar todas as dependências necessárias do projeto, que estão listadas no package.json.
 Inicie o Servidor
 
-Após as dependências estarem instaladas, inicie o servidor com o comando:
-
+**Após as dependências estarem instaladas, inicie o servidor com o comando:
+**
 npm start    
 
-O servidor estará rodando localmente na sua máquina, geralmente acessível em http://localhost:3000/.
+O servidor estará rodando localmente na sua máquina, geralmente acessível em **http://localhost:3000/.**
