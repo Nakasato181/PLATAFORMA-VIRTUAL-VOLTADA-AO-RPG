@@ -37,17 +37,27 @@ Antes de rodar o projeto, você precisará garantir que as seguintes ferramentas
      - Extraia o arquivo ZIP em uma pasta de sua escolha
 
    
-**##Instale as Dependências**
+**2. Instale as Dependências**
+Abra o Node.js no terminal.
 
-**Navegue até a pasta do projeto no terminal do node.js (onde o package.json está localizado) e execute o comando:**
+**Navegue até a pasta do projeto usando o comando cd (substitua pelo caminho correto da pasta):**
 
--npm install
+cd /caminho/para/a/pasta/do/projeto
 
-Este comando irá baixar todas as dependências necessárias do projeto, que estão listadas no package.json.
-Inicie o Servidor
+Verifique se o arquivo package.json está presente nessa pasta.
 
-**Após as dependências estarem instaladas, inicie o servidor com o comando:**
+**Execute o comando para instalar as dependências:**
+npm install
 
-npm start    
+Isso instalará todas as dependências necessárias listadas no arquivo package.json.
 
-O servidor estará rodando localmente na sua máquina, geralmente acessível em **http://localhost:3000/.**
+**3. Inicie o Servidor**
+Após instalar as dependências:
+
+Certifique-se de estar na pasta do projeto.
+**Inicie o servidor com o comando:**
+npm start
+
+**O servidor estará rodando localmente e geralmente estará acessível em:**
+
+http://localhost:3000
