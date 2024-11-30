@@ -49,11 +49,13 @@ Verifique se o arquivo package.json está presente nessa pasta.
 
 **Execute o comando para instalar as dependências:**
 
-npm install
+**npm install
 
 npm install express socket.io
 
-Isso instalará todas as dependências necessárias listadas no arquivo package.json.
+npm install multer**
+
+Isso instalará todas as dependências necessárias
 
 **3. Inicie o Servidor**
 
