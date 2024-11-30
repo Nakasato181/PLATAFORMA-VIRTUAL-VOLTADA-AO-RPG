@@ -38,6 +38,7 @@ Antes de rodar o projeto, você precisará garantir que as seguintes ferramentas
 
    
 **2. Instale as Dependências**
+
 Abra o Node.js no terminal.
 
 **Navegue até a pasta do projeto usando o comando cd (substitua pelo caminho correto da pasta):**
@@ -52,6 +53,7 @@ npm install
 Isso instalará todas as dependências necessárias listadas no arquivo package.json.
 
 **3. Inicie o Servidor**
+
 Após instalar as dependências:
 
 Certifique-se de estar na pasta do projeto.
