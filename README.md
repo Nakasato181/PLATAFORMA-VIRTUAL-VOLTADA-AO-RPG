@@ -49,7 +49,7 @@ Verifique se o arquivo package.json está presente nessa pasta.
 
 **Execute o comando para instalar as dependências:**
 
-****npm install**
+**npm install**
 
 **npm install express socket.io**
 
